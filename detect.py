@@ -1,4 +1,5 @@
 import cv2
+import ConfigParser
 import Queue
 import threading
 import time
@@ -20,6 +21,8 @@ class Detect(threading.Thread):
       if self.queue_in.empty():
         continue
       frame = self.queue_in.get()
+      if self.queue_in.qsize() > int(self.config.get('rpi-art', 'max_queue_size')):
+        continue
 
       gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
       gray = cv2.GaussianBlur(gray, (21, 21), 0)
@@ -48,6 +51,6 @@ class Detect(threading.Thread):
         detected_contours.append((x1, y1, x2, y2))
 
       self.totalframes += 1
-      if self.config['debug'] == 1:
+      if self.config.getboolean('rpi-art', 'debug'):
         print "Processed frame", self.totalframes
 
